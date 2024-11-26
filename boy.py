@@ -9,6 +9,7 @@ import server
 from ball import Ball
 import game_world
 import game_framework
+from server import background
 from state_machine import start_event, right_down, left_up, left_down, right_up, space_down, StateMachine, time_out, \
     upkey_down, downkey_down, upkey_up, downkey_up
 
@@ -206,6 +207,9 @@ class Boy:
         # modify here
         self.x, self.y = get_canvas_width() / 2, get_canvas_height() / 2
 
+        self.x = server.background.w / 2 # x값의 범위 : 0~1836
+        self.y = server.background.h / 2 # y값의 범위 : 0~1108
+
 
 
     def update(self):
@@ -215,15 +219,19 @@ class Boy:
         self.x += math.cos(self.dir) * self.speed * game_framework.frame_time
         self.y += math.sin(self.dir) * self.speed * game_framework.frame_time
 
-        self.x = clamp(25.0, self.x, get_canvas_width()-25.0)
-        self.y = clamp(25.0, self.y, get_canvas_height()-25.0)
+        # 월드 기준으로 x, y 위치를 제한할 필요
+        self.x = clamp(25.0, self.x, server.background.w - 25.0)
+        self.y = clamp(30.0, self.y, server.background.h - 30.0)
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))
 
     def draw(self):
-        self.image.clip_draw(int(self.frame) * 100, self.action * 100, 100, 100, self.x, self.y)
-        self.font.draw(int(self.x - 100), int(self.y + 60), f'({self.x:5.5}, {self.y:5.5})', (255, 255, 0))
+        # x, y는 배경 월드 좌표계를 , sx, sy를 화면 좌표계로 변환
+        sx = self.x - server.background.window_left
+        sy = self.y - server.background.window_bottom
+        self.image.clip_draw(int(self.frame) * 100, self.action * 100, 100, 100, sx, sy)
+        self.font.draw(int(sx - 100), int(sy + 60), f'({self.x:5.5}, {self.y:5.5})', (255, 255, 0))
 
 
     def get_bb(self):
