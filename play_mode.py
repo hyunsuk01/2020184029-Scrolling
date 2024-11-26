@@ -10,8 +10,9 @@ import server
 from boy import Boy
 
 # fill here
-from background import FixedBackground as Background
+# from background import FixedBackground as Background
 # from background import TileBackground as Background
+from background import InfiniteBackground as Background
 
 
 
